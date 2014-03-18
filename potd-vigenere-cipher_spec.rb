@@ -9,7 +9,7 @@ describe "VigenereCipher" do
   let(:code) { "ksgdgbjqbeqkklgdg" }
 	let(:key2) { "kurtrussell" }
 	let(:message2) { "breakdownwasawesome" }
-  let(:code2) { "llvtbxgorhlcunxjiew" }
+  let(:code2)    { "llvtbxgorhlcunxjiew" }
 
   describe "Setter Methods" do
     before(:each) { @cipher = VigenereCipher.new } 
@@ -64,7 +64,7 @@ describe "VigenereCipher" do
           @cipher.code = code2
         end
         it "returns the value for the key" do
-          expect(@cipher.key).to eq(key2)
+          expect(@cipher.key).to eq(VigenereCipher.cycle(key2, message2) )
         end
 
       end
@@ -111,7 +111,7 @@ describe "VigenereCipher" do
 
       context "when key and message are nil" do
         it "asks for the user to enter a key and message" do
-          @cipher.stub!(:gets).and_return("#{key2}\n", "#{message2}\n")
+          @cipher.stub(:gets).and_return("#{key2}\n", "#{message2}\n")
           expect(@cipher.key).to eq(key2)
           expect(@cipher.message).to eq(message2)
           expect(@cipher.code).to eq(code2)
@@ -136,7 +136,7 @@ describe "VigenereCipher" do
           @cipher.message = message2
         end
         it "asks for the user to enter a key" do
-          @cipher.stub!(:gets).and_return("#{key2}\n")
+          @cipher.stub(:gets).and_return("#{key2}\n")
           expect(@cipher.key).to eq(key2)
           expect(@cipher.message).to eq(message2)
           expect(@cipher.code).to eq(code2)

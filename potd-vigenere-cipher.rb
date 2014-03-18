@@ -8,7 +8,7 @@
 #REDDITREDDITREDDI
 #TODAYISMYBIRTHDAY
 #--------------------------
-#  KSGDGBJQBEQKKLGDG
+#  ksgdgbjqbeqkklgdg
 #
 #Using a 0 based alphabet (A=0), R is the 17th letter of the alphabet and T is the 19th letter of the alphabet. (17 + 19) mod 26 = 11 which is where K resides in the alphabet. Repeat for each key/message letter combination until done.
 #
@@ -65,7 +65,7 @@ class VigenereCipher
 
   def code=(code)
     if @key && @message
-      "You cannot modify the code. If you are trying to crack a code without a key or message, use VigenereCipher.crack(code)"
+      puts "You cannot modify the code. If you are trying to crack a code without a key or message, use VigenereCipher.crack(code)"
     else
       @code = code.gsub(ONLY_LETTERS_GSUB, '')
     end
@@ -83,16 +83,9 @@ class VigenereCipher
       @key = please_enter("key")
     end
 
-    if @key.length > @message.length
-      clear
-      puts "Your key cannot be longer than the message."
-    else
     @code ||= VigenereCipher.get_code(@key, @message)
 
-    end
   end
-
-
 
   def clear
     @key, @message, @code = nil
@@ -115,15 +108,12 @@ class VigenereCipher
   end
 
   def get_key(message, code)
-    full_message = ''
-    message.split('').each_index { |x| full_message << LETTERS[(LETTERS.index(message[x]) + LETTERS.index(code[x])) % 26] }
-    full_message
+    cipher(message, code)
   end
 
   def cipher(key, code)
-    key = cycle(key, code).split('')
     the_word = ''
-    key.each_index do |val|
+    cycle(key,code).split('').each_index do |val|
       p = LETTERS.index(code[val]) - LETTERS.index(key[val]) + 26
       p.between?(0,25) ? the_word << LETTERS[p] : the_word << LETTERS[p - 26]
     end
@@ -173,11 +163,7 @@ class VigenereCipher
       all_words.reject! { |beg| messages.grep(Regexp.new(/^(#{beg})#{reg*num}/)).empty? }
       if all_words.count > 1
         temp = all_words.reject { |beg| messages.grep(Regexp.new(/^(#{beg})#{reg*num}$/)).empty? }
-        if temp
-          temp.each { |word| keys_and_msgs.values.grep(/^#{word}#{reg*num}$/).each {|val| poss_keys_and_msgs[keys_and_msgs.key(val)] ||= val } }
-        else
-          next
-        end
+        temp ? temp.each { |word| keys_and_msgs.values.grep(/^#{word}#{reg*num}$/).each {|val| poss_keys_and_msgs[keys_and_msgs.key(val)] ||= val } } : next
       else
         all_words.each { |word| keys_and_msgs.values.grep(/^#{word}#{reg*num}$/).each {|val| poss_keys_and_msgs[keys_and_msgs.key(val)] ||= val } }
       end
