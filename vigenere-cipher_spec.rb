@@ -1,4 +1,4 @@
-require_relative 'potd-vigenere-cipher'
+require_relative 'vigenere-cipher'
 
 describe "VigenereCipher" do
   DICTIONARY_FILE = 'words'
@@ -46,8 +46,7 @@ describe "VigenereCipher" do
 
       context "when key is present" do
         before do
-          @cipher = VigenereCipher.new
-          @cipher.key = key2
+          @cipher = VigenereCipher.new(key2)
         end
 
         it "returns the set value" do
@@ -57,8 +56,7 @@ describe "VigenereCipher" do
 
       context "when key is nil and message and code are present" do
         before do
-          @cipher = VigenereCipher.new
-          @cipher.message = message2
+          @cipher = VigenereCipher.new(nil, message2)
           @cipher.code = code2
         end
         it "returns the calculated value for the key" do
@@ -104,7 +102,7 @@ describe "VigenereCipher" do
         end
         
         it "returns the calculated value" do
-          expect(@cipher.code).to eq("llvtbxgorhlcunxjiew")
+          expect(@cipher.code).to eq(code2)
         end
       end
 
@@ -205,12 +203,12 @@ describe "Dictionary" do
   describe "#all_words" do
     subject { @words.all_words }
     it { should be_a Array }
-    its(:count) { should eq(84) }
+    its(:count) { should eq(File.read(DICTIONARY_FILE).scan(/^\w{3,}$/).count + Dictionary::EXTRA_WORDS.count) }
   end
 
   describe "#words_by_size" do
     subject { @words.words_by_size(3,25) }
     it { should be_a Array }
-    its(:count) { should eq(34) }
+    its(:count) { should eq(File.read(DICTIONARY_FILE).scan(/^\w{3,}$/).count) }
   end
 end

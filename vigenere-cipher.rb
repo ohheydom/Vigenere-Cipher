@@ -101,20 +101,20 @@ class VigenereCipher
   class << self
 
   def get_code(key, message)
-    key = cycle(key, message).split('')
+    key = cycle(key, message).chars
     key.each_index.each_with_object("") { |ind, obj| obj << LETTERS[(LETTERS.index(key[ind]) + LETTERS.index(message[ind])) % 26] }
   end
 
 
   def get_message_or_key(key, code)
-    key = cycle(key, code).split('')
+    key = cycle(key, code).chars
     key.each_index.each_with_object("") { |ind, obj| obj << LETTERS[(LETTERS.index(code[ind]) % 26) - (LETTERS.index(key[ind]))] }
   end
 
   def cycle(key, message)
     new_key = ""
   
-    key.split('').cycle do |letter| 
+    key.chars.cycle do |letter| 
       new_key << letter
       break if new_key.length == message.length
     end
@@ -161,7 +161,7 @@ end
 
   class Dictionary
 
-    EXTRA_WORDS = %w(a i is as at be ed he ho in it jo jr la re ok mo mr si sr st to no my me ma if 
+    EXTRA_WORDS = %w(a i is as at be ed he ho in it jo jr la re ok mo mr si sr st no my me ma if 
                      hi ha go ex do db by ax an of oh or ow ox pi so to uh um up us vs we yo)
 
     def initialize(file)
