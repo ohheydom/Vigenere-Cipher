@@ -126,27 +126,25 @@ class VigenereCipher
     new_key
   end
 
-  def words_and_messages(code, dictionary)
+  def words_and_messages(code, dictionary, max_key_size)
     arr_of_messages = {}
-    dictionary.all_words.each { |word| arr_of_messages[word] = get_message_or_key(word, code) }
+    dictionary.words_by_size(3,max_key_size).each { |word| arr_of_messages[word] = get_message_or_key(word, code) }
     arr_of_messages
   end
 
-
-  def crack(code)
+  def crack(code, max_key_size)
     puts "Cracking..."
 
     dictionary = Dictionary.new(DICTIONARY_FILE)
     all_words = dictionary.all_words.dup
-    keys_and_msgs = words_and_messages(code.downcase, dictionary)
+    keys_and_msgs = words_and_messages(code.downcase, dictionary, max_key_size)
     messages = keys_and_msgs.values
     all_words.reject! { |word| messages.grep(/#{word}/).empty? }
-    regex_matched_words = Regexp.union(all_words)
+    reg = "(#{Regexp.union(all_words)})"
     poss_keys_and_msgs = {}
 
 
     (0..6).to_a.each do |num|
-      reg = "(#{regex_matched_words})"
       check_values_proc = Proc.new do |word| 
         keys_and_msgs.values.grep(/^#{word}#{reg*num}$/).each {|val| poss_keys_and_msgs[keys_and_msgs.key(val)] ||= val } 
       end

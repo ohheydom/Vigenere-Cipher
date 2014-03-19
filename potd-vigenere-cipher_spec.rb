@@ -179,23 +179,19 @@ describe "VigenereCipher" do
   describe "Cracking methods" do
     describe ".crack" do
       it "returns a message" do
-        expect(VigenereCipher.crack(code4)).to eq({ key4 => message4 })
-        expect(VigenereCipher.crack(code2)).to eq({ key2 => message2 })
-        expect(VigenereCipher.crack(code)).to eq({ key => message })
+        expect(VigenereCipher.crack(code4, 12)).to eq({ key4 => message4 })
+        expect(VigenereCipher.crack(code2, 12)).to eq({ key2 => message2 })
+        expect(VigenereCipher.crack(code, 12)).to eq({ key => message })
       end 
     end
 
     describe ".words_and_messages" do
       code =  "llvtbxgorhlcunxjiew"
       dictionary = Dictionary.new(DICTIONARY_FILE)
-      before(:all) { @words_and_messages = VigenereCipher.words_and_messages(code, dictionary) }
+      before(:all) { @words_and_messages = VigenereCipher.words_and_messages(code, dictionary, 10) }
       
       it "creates a hash" do
         expect(@words_and_messages).to be_a Hash
-      end
-      
-      it "contains a message for every word in the dictionary" do
-        expect(@words_and_messages.count).to eq(dictionary.all_words.count)
       end
 
     end
