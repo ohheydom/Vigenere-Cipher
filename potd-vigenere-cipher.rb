@@ -22,7 +22,7 @@ class VigenereCipher
   
   LETTERS = ('a'..'z').to_a
   ONLY_LETTERS_GSUB = /[^a-zA-Z]/
-  DICTIONARY_FILE = "/usr/share/dict/wordsmall"
+  DICTIONARY_FILE = "words" #UNIX has a great dictionary file located at /usr/share/dict/words
 
   def initialize(key=nil, message=nil)
     @key = key ? key.gsub(ONLY_LETTERS_GSUB, '').downcase : nil
@@ -42,7 +42,7 @@ class VigenereCipher
       @key
     else
       if @message && @code
-        @key = VigenereCipher.get_key(@message, @code)
+        @key = VigenereCipher.get_message_or_key(@message, @code)
       else
         @key = please_enter("key")
       end
@@ -54,7 +54,7 @@ class VigenereCipher
       @message
     else
       if @key && @code
-        @message = VigenereCipher.get_message(@key, @code)
+        @message = VigenereCipher.get_message_or_key(@key, @code)
       elsif @code
         VigenereCipher.crack(@code)
       else
@@ -107,16 +107,11 @@ class VigenereCipher
     full_message
   end
 
-  def get_key(message, code)
-    get_message(message, code)
-  end
 
-  def get_message(key, code)
+  def get_message_or_key(key, code)
     the_word = ''
     key = cycle(key, code).split('')
-    key.each_index do |val|
-      the_word << LETTERS[(LETTERS.index(code[val]) % 26) - (LETTERS.index(key[val]))]
-    end
+    key.each_index { |val| the_word << LETTERS[(LETTERS.index(code[val]) % 26) - (LETTERS.index(key[val]))] }
     the_word
   end
 
@@ -133,9 +128,7 @@ class VigenereCipher
 
   def words_and_messages(code, dictionary)
     arr_of_messages = {}
-    dictionary.all_words.each do |word|
-      arr_of_messages[word] = get_message(word, code)
-    end
+    dictionary.all_words.each { |word| arr_of_messages[word] = get_message_or_key(word, code) }
     arr_of_messages
   end
 
@@ -154,12 +147,16 @@ class VigenereCipher
 
     (0..6).to_a.each do |num|
       reg = "(#{regex_matched_words})"
-      all_words.reject! { |beg| messages.grep(Regexp.new(/^(#{beg})#{reg*num}/)).empty? }
+      check_values_proc = Proc.new do |word| 
+        keys_and_msgs.values.grep(/^#{word}#{reg*num}$/).each {|val| poss_keys_and_msgs[keys_and_msgs.key(val)] ||= val } 
+      end
+
+      all_words.reject! { |beg| messages.grep(/^(#{beg})#{reg*num}/).empty? }
       if all_words.count > 1
-        temp = all_words.reject { |beg| messages.grep(Regexp.new(/^(#{beg})#{reg*num}$/)).empty? }
-        temp ? temp.each { |word| keys_and_msgs.values.grep(/^#{word}#{reg*num}$/).each {|val| poss_keys_and_msgs[keys_and_msgs.key(val)] ||= val } } : next
+        temp = all_words.reject { |beg| messages.grep(/^(#{beg})#{reg*num}$/).empty? }
+        temp ? temp.each(&check_values_proc) : next
       else
-        all_words.each { |word| keys_and_msgs.values.grep(/^#{word}#{reg*num}$/).each {|val| poss_keys_and_msgs[keys_and_msgs.key(val)] ||= val } }
+        all_words.each(&check_values_proc)
       end
     end
 
@@ -184,7 +181,7 @@ end
     end
 
     def words_by_size(min, max)
-      (@word_list.scan(/^\w{#{min},#{max}}$/)).uniq
+      @word_list.scan(/^\w{#{min},#{max}}$/).uniq
     end
 
   end

@@ -1,7 +1,7 @@
 require_relative 'potd-vigenere-cipher'
 
 describe "VigenereCipher" do
-
+  DICTIONARY_FILE = 'words'
   let(:key_single_letter) { "r" }
   let(:message_single_letter) { "t" }
 	let(:key) { "reddit" }
@@ -159,23 +159,26 @@ describe "VigenereCipher" do
       it {should eq(code) }
     end
 
-    describe ".get_key" do
-      subject { VigenereCipher.get_key(message2, code2) }
-      it {should eq(VigenereCipher.cycle(key2, message2)) }
+    describe ".get_message_or_key KEY" do
+      it "should return the proper key" do
+        expect(VigenereCipher.get_message_or_key(message, code)).to eq(VigenereCipher.cycle(key, code))
+        expect(VigenereCipher.get_message_or_key(message2, code2)).to eq(VigenereCipher.cycle(key2, code2))
+        expect(VigenereCipher.get_message_or_key(message3, code3)).to eq(VigenereCipher.cycle(key3, code3))
+      end
     end
 
-    describe ".get_message" do
+    describe ".get_message_or_key MESSAGE" do
       it "should return the proper message" do
-        expect(VigenereCipher.get_message(key, code)).to eq(message)
-        expect(VigenereCipher.get_message(key2, code2)).to eq(message2)
-        expect(VigenereCipher.get_message(key3, code3)).to eq(message3)
+        expect(VigenereCipher.get_message_or_key(key, code)).to eq(message)
+        expect(VigenereCipher.get_message_or_key(key2, code2)).to eq(message2)
+        expect(VigenereCipher.get_message_or_key(key3, code3)).to eq(message3)
       end
     end
   end
 
   describe "Cracking methods" do
     describe ".crack" do
-      it "returns something" do
+      it "returns a message" do
         expect(VigenereCipher.crack(code4)).to eq({ key4 => message4 })
         expect(VigenereCipher.crack(code2)).to eq({ key2 => message2 })
         expect(VigenereCipher.crack(code)).to eq({ key => message })
@@ -183,8 +186,10 @@ describe "VigenereCipher" do
     end
 
     describe ".words_and_messages" do
-      let(:dictionary) { Dictionary.new('/usr/share/dict/wordsmall') }
-      before(:all) { @words_and_messages = VigenereCipher.words_and_messages(code2, dictionary) }
+      code =  "llvtbxgorhlcunxjiew"
+      dictionary = Dictionary.new(DICTIONARY_FILE)
+      before(:all) { @words_and_messages = VigenereCipher.words_and_messages(code, dictionary) }
+      
       it "creates a hash" do
         expect(@words_and_messages).to be_a Hash
       end
@@ -198,22 +203,18 @@ describe "VigenereCipher" do
 end
 
 describe "Dictionary" do
-  file =  "/usr/share/dict/words"
-  before(:all) { @words = Dictionary.new(file) }
+  before(:all) { @words = Dictionary.new(DICTIONARY_FILE) }
   subject { @words }
-
-  it { should respond_to :all_words }
-  it { should respond_to :words_by_size }
 
   describe "#all_words" do
     subject { @words.all_words }
     it { should be_a Array }
-    its(:count) { should eq(71671) }
+    its(:count) { should eq(84) }
   end
 
   describe "#words_by_size" do
     subject { @words.words_by_size(3,25) }
     it { should be_a Array }
-    its(:count) { should eq(71621) }
+    its(:count) { should eq(34) }
   end
 end
