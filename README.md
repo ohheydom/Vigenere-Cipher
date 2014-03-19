@@ -11,7 +11,7 @@ Speed things up. With a small wordlist, cracking a code works extremely fast. Bu
 To encode a message:
 
 ```ruby
-require_relative 'vigenere_cipher'
+require_relative 'vigenere-cipher'
 var = VigenereCipher.new(key, message).
 var.code
 ```
