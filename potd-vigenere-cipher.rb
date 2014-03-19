@@ -5,10 +5,10 @@
 #Message:
 #      TODAYISMYBIRTHDAY
 #
-#REDDITREDDITREDDI
-#TODAYISMYBIRTHDAY
-#--------------------------
-#  ksgdgbjqbeqkklgdg
+#   REDDITREDDITREDDI
+#   TODAYISMYBIRTHDAY
+#   -----------------
+#   ksgdgbjqbeqkklgdg
 #
 #Using a 0 based alphabet (A=0), R is the 17th letter of the alphabet and T is the 19th letter of the alphabet. (17 + 19) mod 26 = 11 which is where K resides in the alphabet. Repeat for each key/message letter combination until done.
 #
@@ -102,17 +102,13 @@ class VigenereCipher
 
   def get_code(key, message)
     key = cycle(key, message).split('')
-    full_message = ''
-    key.each_index { |x| full_message << LETTERS[(LETTERS.index(key[x]) + LETTERS.index(message[x])) % 26] }
-    full_message
+    key.each_index.each_with_object("") { |ind, obj| obj << LETTERS[(LETTERS.index(key[ind]) + LETTERS.index(message[ind])) % 26] }
   end
 
 
   def get_message_or_key(key, code)
-    the_word = ''
     key = cycle(key, code).split('')
-    key.each_index { |val| the_word << LETTERS[(LETTERS.index(code[val]) % 26) - (LETTERS.index(key[val]))] }
-    the_word
+    key.each_index.each_with_object("") { |ind, obj| obj << LETTERS[(LETTERS.index(code[ind]) % 26) - (LETTERS.index(key[ind]))] }
   end
 
   def cycle(key, message)
@@ -127,9 +123,7 @@ class VigenereCipher
   end
 
   def words_and_messages(code, dictionary, max_key_size)
-    arr_of_messages = {}
-    dictionary.words_by_size(3,max_key_size).each { |word| arr_of_messages[word] = get_message_or_key(word, code) }
-    arr_of_messages
+    dictionary.words_by_size(3,max_key_size).each_with_object({}) { |word, obj| obj[word] = get_message_or_key(word, code) }
   end
 
   def crack(code, max_key_size)
