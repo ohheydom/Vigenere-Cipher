@@ -10,6 +10,12 @@ describe "VigenereCipher" do
 	let(:key2) { "kurtrussell" }
 	let(:message2) { "breakdownwasawesome" }
   let(:code2)    { "llvtbxgorhlcunxjiew" }
+  let(:key3) { "aazzaazzxx" }
+  let(:message3) { "zzjzaajzzyxppq" }
+  let(:code3) { "zziyaaiywvxpop" }
+  let(:key4) { "day" }
+  let(:message4) { "welcometoproblemoftheday" }
+  let(:code4) { "zejfokhtmsrmelcpodwhcgaw" }
 
   describe "Setter Methods" do
     before(:each) { @cipher = VigenereCipher.new } 
@@ -20,7 +26,7 @@ describe "VigenereCipher" do
         @cipher.message = message
       end
 
-      it "validates the #key and #message to only include letters" do
+      it "parses the #key and #message to only include letters" do
         @cipher.key = "a&&*()(&^%$$#%$%&*(*aaaa11223344''''''''aabbcc"
         @cipher.message = "eebbccdd039324834;;.,..//\//r"
         expect(@cipher.key).to eq("aaaaaaabbcc")
@@ -31,15 +37,7 @@ describe "VigenereCipher" do
         @cipher.message = message2
         expect(@cipher.instance_variable_get(:@code)).to be_nil
       end
-    end
 
-    describe "#code" do
-      before do
-        @cipher.message = message
-      end
-      
-      it "warns the user if the code is smaller than the key" do
-      end
     end
   end
 
@@ -52,7 +50,7 @@ describe "VigenereCipher" do
           @cipher.key = key2
         end
 
-        it "returns the value" do
+        it "returns the set value" do
           expect(@cipher.key).to eq(key2)
         end
       end
@@ -63,7 +61,7 @@ describe "VigenereCipher" do
           @cipher.message = message2
           @cipher.code = code2
         end
-        it "returns the value for the key" do
+        it "returns the calculated value for the key" do
           expect(@cipher.key).to eq(VigenereCipher.cycle(key2, message2) )
         end
 
@@ -77,17 +75,18 @@ describe "VigenereCipher" do
 
       context "when message is present" do
         before { @cipher.message = message2 }
-        it "returns the value" do
+        it "returns the set value" do
           expect(@cipher.message).to eq(message2)
         end
       end
 
-      context "when key and code are present" do
+      context "when message is nil and key and code are present" do
         before do
           @cipher.key = key2
           @cipher.code = code2
         end
-        it "returns 'breakdownwasawesome'" do
+        
+        it "returns the calculated value" do
           expect(@cipher.message = message2)
         end
       end
@@ -104,7 +103,7 @@ describe "VigenereCipher" do
           @cipher.message = message2
         end
         
-        it "returns 'llvtbxgorhlcunxjiew'" do
+        it "returns the calculated value" do
           expect(@cipher.code).to eq("llvtbxgorhlcunxjiew")
         end
       end
@@ -123,7 +122,7 @@ describe "VigenereCipher" do
           @cipher.key = key2
         end
 
-        it "asks for the user to enter a key" do
+        it "asks for the user to enter a message" do
           @cipher.stub(:gets).and_return("#{message2}\n")
           expect(@cipher.key).to eq(key2)
           expect(@cipher.message).to eq(message2)
@@ -135,6 +134,7 @@ describe "VigenereCipher" do
         before do
           @cipher.message = message2
         end
+
         it "asks for the user to enter a key" do
           @cipher.stub(:gets).and_return("#{key2}\n")
           expect(@cipher.key).to eq(key2)
@@ -144,13 +144,57 @@ describe "VigenereCipher" do
       end
     end
   end
-	describe ".cycle" do
-		let(:response) { VigenereCipher.cycle(key, message) }
-		
-		it "cycles through the key until its length == message.length" do
-			expect(response).to eq ("redditredditreddi")
-		end
-	end
+
+  describe "Class methods" do
+    describe ".cycle" do
+      let(:response) { VigenereCipher.cycle(key, message) }
+      
+      it "cycles through the key until its length == message.length" do
+        expect(response).to eq ("redditredditreddi")
+      end
+    end
+
+    describe ".get_code" do
+      subject { VigenereCipher.get_code(key, message) }
+      it {should eq(code) }
+    end
+
+    describe ".get_key" do
+      subject { VigenereCipher.get_key(message2, code2) }
+      it {should eq(VigenereCipher.cycle(key2, message2)) }
+    end
+
+    describe ".get_message" do
+      it "should return the proper message" do
+        expect(VigenereCipher.get_message(key, code)).to eq(message)
+        expect(VigenereCipher.get_message(key2, code2)).to eq(message2)
+        expect(VigenereCipher.get_message(key3, code3)).to eq(message3)
+      end
+    end
+  end
+
+  describe "Cracking methods" do
+    describe ".crack" do
+      it "returns something" do
+        expect(VigenereCipher.crack(code4)).to eq({ key4 => message4 })
+        expect(VigenereCipher.crack(code2)).to eq({ key2 => message2 })
+        expect(VigenereCipher.crack(code)).to eq({ key => message })
+      end 
+    end
+
+    describe ".words_and_messages" do
+      let(:dictionary) { Dictionary.new('/usr/share/dict/wordsmall') }
+      before(:all) { @words_and_messages = VigenereCipher.words_and_messages(code2, dictionary) }
+      it "creates a hash" do
+        expect(@words_and_messages).to be_a Hash
+      end
+      
+      it "contains a message for every word in the dictionary" do
+        expect(@words_and_messages.count).to eq(dictionary.all_words.count)
+      end
+
+    end
+  end
 end
 
 describe "Dictionary" do
@@ -164,7 +208,7 @@ describe "Dictionary" do
   describe "#all_words" do
     subject { @words.all_words }
     it { should be_a Array }
-    its(:count) { should eq(71670) }
+    its(:count) { should eq(71671) }
   end
 
   describe "#words_by_size" do

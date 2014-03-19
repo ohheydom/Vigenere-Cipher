@@ -54,7 +54,7 @@ class VigenereCipher
       @message
     else
       if @key && @code
-        @message = VigenereCipher.cipher(@key, @code)
+        @message = VigenereCipher.get_message(@key, @code)
       elsif @code
         VigenereCipher.crack(@code)
       else
@@ -108,14 +108,14 @@ class VigenereCipher
   end
 
   def get_key(message, code)
-    cipher(message, code)
+    get_message(message, code)
   end
 
-  def cipher(key, code)
+  def get_message(key, code)
     the_word = ''
-    cycle(key,code).split('').each_index do |val|
-      p = LETTERS.index(code[val]) - LETTERS.index(key[val]) + 26
-      p.between?(0,25) ? the_word << LETTERS[p] : the_word << LETTERS[p - 26]
+    key = cycle(key, code).split('')
+    key.each_index do |val|
+      the_word << LETTERS[(LETTERS.index(code[val]) % 26) - (LETTERS.index(key[val]))]
     end
     the_word
   end
@@ -131,16 +131,10 @@ class VigenereCipher
     new_key
   end
 
-  def decipher(code, dictionary)
+  def words_and_messages(code, dictionary)
     arr_of_messages = {}
-    dictionary.words_by_size(1,5).each do |word|
-      the_word = ""
-      key = self.cycle(word, code.downcase).split('')
-      key.each_index do |val|
-        p = LETTERS.index(code[val]) - LETTERS.index(key[val]) + 26
-        p.between?(0,25) ? the_word << LETTERS[p] : the_word << LETTERS[p - 26]
-      end
-      arr_of_messages[word] = the_word
+    dictionary.all_words.each do |word|
+      arr_of_messages[word] = get_message(word, code)
     end
     arr_of_messages
   end
@@ -151,7 +145,7 @@ class VigenereCipher
 
     dictionary = Dictionary.new(DICTIONARY_FILE)
     all_words = dictionary.all_words.dup
-    keys_and_msgs = decipher(code.downcase, dictionary)
+    keys_and_msgs = words_and_messages(code.downcase, dictionary)
     messages = keys_and_msgs.values
     all_words.reject! { |word| messages.grep(/#{word}/).empty? }
     regex_matched_words = Regexp.union(all_words)
@@ -178,7 +172,7 @@ end
 
   class Dictionary
 
-    EXTRA_WORDS = %w(a i as at be ed he ho in it jo jr la re ok mo mr si sr st to no my me ma if 
+    EXTRA_WORDS = %w(a i is as at be ed he ho in it jo jr la re ok mo mr si sr st to no my me ma if 
                      hi ha go ex do db by ax an of oh or ow ox pi so to uh um up us vs we yo)
 
     def initialize(file)
