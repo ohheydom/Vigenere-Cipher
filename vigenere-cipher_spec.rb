@@ -176,10 +176,11 @@ describe 'VigenereCipher' do
 
   describe 'Cracking methods' do
     describe '.crack' do
+      dictionary = Dictionary.new(DICTIONARY_FILE)
       it 'returns a message' do
-        expect(VigenereCipher.crack(code4, 12)).to eq(key4 => message4)
-        expect(VigenereCipher.crack(code2, 12)).to eq(key2 => message2)
-        expect(VigenereCipher.crack(code, 12)).to eq(key => message)
+        expect(VigenereCipher.crack(code4, dictionary, 12)).to eq(key4 => message4)
+        expect(VigenereCipher.crack(code2, dictionary, 12)).to eq(key2 => message2)
+        expect(VigenereCipher.crack(code, dictionary, 12)).to eq(key => message)
       end
     end
 

@@ -60,7 +60,7 @@ class VigenereCipher
       if @key && @code
         @message = VigenereCipher.get_message_or_key(@key, @code)
       elsif @code
-        VigenereCipher.crack(@code)
+        VigenereCipher.crack(@code, Dictionary.new(DICTIONARY_FILE), 12)
       else
         @message = please_enter('message')
       end
@@ -96,70 +96,77 @@ class VigenereCipher
 
   private
 
+  WordsStruct = Struct.new(:all_words, :keys_and_msgs, :poss_keys_and_msgs)
+
   def please_enter(variable_name)
     puts "Please enter a #{variable_name}: "
     gets.chomp.gsub(ONLY_LETTERS_GSUB, '').downcase
   end
 
   class << self
-  def get_code(key, message)
-    key = cycle(key, message).chars
-    key.each_index.each_with_object('') { |ind, obj| obj << LETTERS[(LETTERS.index(key[ind]) + LETTERS.index(message[ind])) % 26] }
-  end
-
-  def get_message_or_key(key, code)
-    key = cycle(key, code).chars
-    key.each_index.each_with_object('') { |ind, obj| obj << LETTERS[(LETTERS.index(code[ind]) % 26) - (LETTERS.index(key[ind]))] }
-  end
-
-  def cycle(key, message)
-    new_key = ''
-
-    key.chars.cycle do |letter|
-      new_key << letter
-      break if new_key.length == message.length
+    def get_code(key, message)
+      key = cycle(key, message).chars
+      key.each_index.each_with_object('') { |ind, obj| obj << LETTERS[(LETTERS.index(key[ind]) + LETTERS.index(message[ind])) % 26] }
     end
 
-    new_key
-  end
-
-  def words_and_messages(code, dictionary, max_key_size)
-    dictionary.words_by_size(3, max_key_size).each_with_object({}) do |word, obj| 
-      obj[word] = get_message_or_key(word, code)
+    def get_message_or_key(key, code)
+      key = cycle(key, code).chars
+      key.each_index.each_with_object('') { |ind, obj| obj << LETTERS[(LETTERS.index(code[ind]) % 26) - (LETTERS.index(key[ind]))] }
     end
-  end
 
-  def check_values_proc(keys_and_msgs, reg, num, poss_keys_and_msgs)
-    proc do |word|
-      keys_and_msgs.values.grep(/^#{word}#{reg * num}$/).each do |val|
-        poss_keys_and_msgs[keys_and_msgs.key(val)] ||= val
+    def cycle(key, message)
+      new_key = ''
+
+      key.chars.cycle do |letter|
+        new_key << letter
+        break if new_key.length == message.length
       end
+
+      new_key
     end
-  end
 
-  def crack(code, max_key_size)
-    puts 'Cracking...'
-
-    dictionary = Dictionary.new(DICTIONARY_FILE)
-    all_words = dictionary.all_words.dup
-    keys_and_msgs = words_and_messages(code.downcase, dictionary, max_key_size)
-    messages = keys_and_msgs.values
-    all_words.reject! { |word| messages.grep(/#{word}/).empty? }
-    reg = "(#{Regexp.union(all_words)})"
-    poss_keys_and_msgs = {}
-
-    (0..6).to_a.each do |num|
-      all_words.reject! { |beg| messages.grep(/^(#{beg})#{reg * num}/).empty? }
-      if all_words.count > 1
-        temp = all_words.reject { |beg| messages.grep(/^(#{beg})#{reg * num}$/).empty? }
-        temp ? temp.each(&check_values_proc(keys_and_msgs, reg, num, poss_keys_and_msgs)) : next
-      else
-        all_words.each(&check_values_proc(keys_and_msgs, reg, num, poss_keys_and_msgs))
+    def words_and_messages(code, dictionary, max_key_size)
+      dictionary.words_by_size(3, max_key_size).each_with_object({}) do |word, obj|
+        obj[word] = get_message_or_key(word, code)
       end
     end
 
-    poss_keys_and_msgs
-  end
+    def check_values_proc(struct, reg, num)
+      proc do |word|
+        struct.keys_and_msgs.values.grep(/^#{word}#{reg * num}$/).each do |val|
+          struct.poss_keys_and_msgs[struct.keys_and_msgs.key(val)] ||= val
+        end
+      end
+    end
+
+    def reject_and_accept_words(struct)
+      keys_and_msgs = struct.keys_and_msgs
+      poss_keys_and_msgs = struct.poss_keys_and_msgs
+      all_words = struct.all_words.reject! { |word| keys_and_msgs.values.grep(/#{word}/).empty? }
+      reg = "(#{Regexp.union(all_words)})"
+
+      (0..6).to_a.each do |num|
+        all_words.reject! { |beg| keys_and_msgs.values.grep(/^(#{beg})#{reg * num}/).empty? }
+        if all_words.count > 1
+          temp = all_words.reject { |beg| keys_and_msgs.values.grep(/^(#{beg})#{reg * num}$/).empty? }
+          temp ? temp.each(&check_values_proc(struct, reg, num)) : next
+        else
+          all_words.each(&check_values_proc(struct, reg, num))
+        end
+      end
+
+      poss_keys_and_msgs
+    end
+
+    def crack(code, dictionary, max_key_size)
+      puts 'Cracking...'
+
+      all_words = dictionary.all_words.dup
+      keys_and_msgs = words_and_messages(code.downcase, dictionary, max_key_size)
+      words = WordsStruct.new(all_words, keys_and_msgs, {})
+
+      reject_and_accept_words(words)
+    end
   end
 end
 
@@ -177,6 +184,6 @@ class Dictionary
   end
 
   def words_by_size(min, max)
-    (@word_list.scan(/^\w{#{min},#{max}}$/)) .uniq
+    (@word_list.scan(/^\w{#{min},#{max}}$/)).uniq
   end
 end
