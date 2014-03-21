@@ -96,7 +96,7 @@ class VigenereCipher
 
   private
 
-  WordsStruct = Struct.new(:all_words, :keys_and_msgs, :poss_keys_and_msgs)
+  WordsStruct = Struct.new(:all_words, :keys_and_msgs)
 
   def please_enter(variable_name)
     puts "Please enter a #{variable_name}: "
@@ -131,31 +131,13 @@ class VigenereCipher
       end
     end
 
-    def check_values_proc(struct, reg, num)
-      proc do |word|
-        struct.keys_and_msgs.values.grep(/^#{word}#{reg * num}$/).each do |val|
-          struct.poss_keys_and_msgs[struct.keys_and_msgs.key(val)] ||= val
-        end
-      end
-    end
-
     def reject_and_accept_words(struct)
       keys_and_msgs = struct.keys_and_msgs
-      poss_keys_and_msgs = struct.poss_keys_and_msgs
       all_words = struct.all_words.reject! { |word| keys_and_msgs.values.grep(/#{word}/).empty? }
       reg = "(#{Regexp.union(all_words)})"
-
-      (0..6).to_a.each do |num|
-        all_words.reject! { |beg| keys_and_msgs.values.grep(/^(#{beg})#{reg * num}/).empty? }
-        if all_words.count > 1
-          temp = all_words.reject { |beg| keys_and_msgs.values.grep(/^(#{beg})#{reg * num}$/).empty? }
-          temp ? temp.each(&check_values_proc(struct, reg, num)) : next
-        else
-          all_words.each(&check_values_proc(struct, reg, num))
-        end
-      end
-
-      poss_keys_and_msgs
+      
+      vals = keys_and_msgs.values.grep(/^(#{reg})+$/)
+      vals.each_with_object({}) { |val, obj| obj[keys_and_msgs.key(val)] = val }
     end
 
     def crack(code, dictionary, max_key_size)
@@ -163,7 +145,7 @@ class VigenereCipher
 
       all_words = dictionary.all_words.dup
       keys_and_msgs = words_and_messages(code.downcase, dictionary, max_key_size)
-      words = WordsStruct.new(all_words, keys_and_msgs, {})
+      words = WordsStruct.new(all_words, keys_and_msgs)
 
       reject_and_accept_words(words)
     end
