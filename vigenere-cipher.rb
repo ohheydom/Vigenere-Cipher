@@ -96,8 +96,6 @@ class VigenereCipher
 
   private
 
-  WordsStruct = Struct.new(:all_words, :keys_and_msgs)
-
   def please_enter(variable_name)
     puts "Please enter a #{variable_name}: "
     gets.chomp.gsub(ONLY_LETTERS_GSUB, '').downcase
@@ -131,23 +129,18 @@ class VigenereCipher
       end
     end
 
-    def reject_and_accept_words(struct)
-      keys_and_msgs = struct.keys_and_msgs
-      all_words = struct.all_words.reject! { |word| keys_and_msgs.values.grep(/#{word}/).empty? }
+    def reject_and_accept_words(all_words, keys_and_msgs)
+      all_words.reject! { |word| keys_and_msgs.values.grep(/#{word}/).empty? }
       reg = "(#{Regexp.union(all_words)})"
-      
       vals = keys_and_msgs.values.grep(/^(#{reg})+$/)
       vals.each_with_object({}) { |val, obj| obj[keys_and_msgs.key(val)] = val }
     end
 
     def crack(code, dictionary, max_key_size)
       puts 'Cracking...'
-
       all_words = dictionary.all_words.dup
       keys_and_msgs = words_and_messages(code.downcase, dictionary, max_key_size)
-      words = WordsStruct.new(all_words, keys_and_msgs)
-
-      reject_and_accept_words(words)
+      reject_and_accept_words(all_words, keys_and_msgs)
     end
   end
 end

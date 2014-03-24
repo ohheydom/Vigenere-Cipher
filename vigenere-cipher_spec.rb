@@ -187,11 +187,10 @@ describe 'VigenereCipher' do
     describe '.words_and_messages' do
       code =  'llvtbxgorhlcunxjiew'
       dictionary = Dictionary.new(DICTIONARY_FILE)
-      before(:all) { @words_and_messages = VigenereCipher.words_and_messages(code, dictionary, 10) }
+      subject { VigenereCipher.words_and_messages(code2, dictionary, 14) }
 
-      it 'creates a hash' do
-        expect(@words_and_messages).to be_a Hash
-      end
+      it { should be_a Hash }
+      it { should include(key2 => message2) }
 
     end
   end
