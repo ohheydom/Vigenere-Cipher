@@ -2,7 +2,7 @@ require_relative 'vigenere-cipher'
 
 describe 'VigenereCipher' do
   DICTIONARY_FILE = 'words'
-  let(:key_single_letter) { 'r' }
+  let(:key_single_letter) { 'r' } 
   let(:message_single_letter) { 't' }
   let(:key) { 'reddit' }
   let(:message) { 'todayismybirthday' }
@@ -185,7 +185,6 @@ describe 'VigenereCipher' do
     end
 
     describe '.words_and_messages' do
-      code =  'llvtbxgorhlcunxjiew'
       dictionary = Dictionary.new(DICTIONARY_FILE)
       subject { VigenereCipher.words_and_messages(code2, dictionary, 14) }
 
@@ -208,7 +207,6 @@ describe 'Dictionary' do
     it 'does not return any strings less than 3 characters' do
       expect((@words.all_words.grep(/^\w{1,2}$/) - Dictionary::EXTRA_WORDS).count).to eq(0)
     end
-
   end
 
   describe '#words_by_size' do
