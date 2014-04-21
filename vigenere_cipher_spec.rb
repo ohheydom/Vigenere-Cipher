@@ -1,8 +1,8 @@
-require_relative 'vigenere-cipher'
+require_relative 'vigenere_cipher'
 
 describe 'VigenereCipher' do
   DICTIONARY_FILE = 'words'
-  let(:key_single_letter) { 'r' } 
+  let(:key_single_letter) { 'r' }
   let(:message_single_letter) { 't' }
   let(:key) { 'reddit' }
   let(:message) { 'todayismybirthday' }
@@ -37,13 +37,11 @@ describe 'VigenereCipher' do
         @cipher.message = message2
         expect(@cipher.instance_variable_get(:@code)).to be_nil
       end
-
     end
   end
 
   describe 'Getter Methods' do
     describe '#key' do
-
       context 'when key is present' do
         before do
           @cipher = VigenereCipher.new(key2)
@@ -190,7 +188,6 @@ describe 'VigenereCipher' do
 
       it { should be_a Hash }
       it { should include(key2 => message2) }
-
     end
   end
 end
