@@ -25,7 +25,6 @@ describe Cracker do
   end
 
   describe '#words_and_messages' do
-    dictionary = Dictionary.new(DICTIONARY_FILE)
     subject { Cracker.new(code: code2).words_and_messages }
 
     it { should be_a Hash }

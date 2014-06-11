@@ -26,7 +26,7 @@ class Cracker
 
   def words_and_messages
     dictionary.words_by_size(3, max_key_size).each_with_object({}) do |word, obj|
-      obj[word] = decode(word, code)
+      obj[word] = decode(word, code.downcase)
     end
   end
 
@@ -40,7 +40,6 @@ class Cracker
   def crack
     puts 'Cracking...'
     all_words = dictionary.all_words.dup
-    keys_and_msgs = words_and_messages(code.downcase, dictionary, max_key_size)
-    reject_and_accept_words(all_words, keys_and_msgs)
+    reject_and_accept_words(all_words, words_and_messages)
   end
 end
