@@ -1,4 +1,4 @@
-require_relative 'dictionary'
+require_relative '../dictionary'
 
 describe Dictionary do
   DICTIONARY_FILE = 'words'

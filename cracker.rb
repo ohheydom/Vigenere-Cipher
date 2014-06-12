@@ -21,7 +21,9 @@ class Cracker
 
   def decode(key, message)
     new_key = cycle(key, message).chars
-    new_key.each_index.each_with_object('') { |ind, obj| obj << LETTERS[(LETTERS.index(code[ind]) % 26) - (LETTERS.index(new_key[ind]))] }
+    new_key.each_index.each_with_object('') do |ind, obj| 
+      obj << LETTERS[(LETTERS.index(code[ind]) % 26) - (LETTERS.index(new_key[ind]))]
+    end
   end
 
   def words_and_messages

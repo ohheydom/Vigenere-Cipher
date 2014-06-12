@@ -1,5 +1,5 @@
-require_relative 'cracker'
-require_relative 'dictionary'
+require_relative '../cracker'
+require_relative '../dictionary'
 
 describe Cracker do
   DICTIONARY_FILE = 'words'

@@ -1,4 +1,4 @@
-require_relative 'decoder'
+require_relative '../decoder'
 
 describe Decoder do
   let(:key) { 'reddit' }

@@ -1,4 +1,4 @@
-require_relative 'encoder'
+require_relative '../encoder'
 
 describe Encoder do
   let(:key) { 'reddit' }

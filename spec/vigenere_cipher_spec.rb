@@ -1,4 +1,4 @@
-require_relative 'vigenere_cipher'
+require_relative '../vigenere_cipher'
 
 describe 'VigenereCipher' do
   DICTIONARY_FILE = 'words'
