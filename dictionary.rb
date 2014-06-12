@@ -4,6 +4,7 @@ class Dictionary
                    so to uh um up us vs we yo)
 
   attr_reader :word_list
+
   def initialize(file)
     @word_list = File.read(file).downcase
   end
