@@ -11,22 +11,19 @@ Speed things up. With a small wordlist, cracking a code works extremely fast. Bu
 To encode a message:
 
 ```ruby
-require_relative 'encoder'
-Encoder.new(key: 'key', message: 'message').encode
+VigenereCipher.new.encode(key: 'key', message: 'message')
 ```
 
 To decode a message:
 
 ```ruby
-require_relative 'decoder'
-Decoder.new(key: 'key', code: 'code').decode
+VigenereCipher.new.decode(key: 'key', code: 'code')
 ```
 
 To crack a code:
 
 ```ruby
-require_relative 'cracker'
-Cracker.new(dictionary: Dictionary.new('yourdictionaryfile'), code: 'code')
+VigenereCipher.new.crack(code: 'code') 
 ```
 
 I've also included a really small dictionary file for testing purposes.

@@ -25,12 +25,41 @@
 #  zejfokhtmsrmelcpodwhcgaw
 
 require_relative 'dictionary'
+require_relative 'decoder'
+require_relative 'encoder'
+require_relative 'cracker'
 
 class VigenereCipher
   LETTERS = ('a'..'z').to_a
   ONLY_LETTERS_GSUB = /[^a-zA-Z]/
   DICTIONARY_FILE = 'words' # UNIX has a great dictionary file located at /usr/share/dict/words
 
-  def initialize()
+  attr_reader :encoder, :decoder, :cracker
+
+  def initialize(args = {})
+    args = defaults.merge(args)
+    @encoder = args[:encoder]
+    @decoder = args[:decoder]
+    @cracker = args[:cracker]
+  end
+
+  def crack(code)
+    cracker.new(code: code).crack
+  end
+
+  def decode(key, code)
+    decoder.new(key: key, code: code).decode
+  end
+
+  def encode(key, message)
+    encoder.new(key: key, message: message).encode
+  end
+
+  private
+
+  def defaults
+    { encoder: Encoder,
+      decoder: Decoder,
+      cracker: Cracker }
   end
 end
