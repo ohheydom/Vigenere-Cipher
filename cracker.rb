@@ -1,29 +1,18 @@
+require_relative 'decoder'
+
 class Cracker
-  attr_reader :code, :dictionary, :max_key_size
+  attr_reader :code, :dictionary, :max_key_size, :decoder
   LETTERS = ('a'..'z').to_a
 
   def initialize(args)
     @dictionary = args[:dictionary] || Dictionary.new('words')
     @code = args[:code]
     @max_key_size = args[:max_key_size] || 14
+    @decoder = args[:decoder] || Decoder
   end
 
-  def cycle(key, message)
-    new_key = ''
-
-    key.chars.cycle do |letter|
-      new_key << letter
-      break if new_key.length == message.length
-    end
-
-    new_key
-  end
-
-  def decode(key, message)
-    new_key = cycle(key, message).chars
-    new_key.each_index.each_with_object('') do |ind, obj| 
-      obj << LETTERS[(LETTERS.index(code[ind]) % 26) - (LETTERS.index(new_key[ind]))]
-    end
+  def decode(key, code)
+    decoder.new(key: key, code: code).decode
   end
 
   def words_and_messages

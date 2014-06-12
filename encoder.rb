@@ -13,13 +13,9 @@ class Encoder
   end
 
   def cycle
-    new_key = ''
-
-    key.chars.cycle do |letter|
-      new_key << letter
-      break if new_key.length == message.length
+    key.chars.cycle.inject('') do |acc, letter|
+      return acc if acc.length == message.length
+      acc << letter
     end
-
-    new_key
   end
 end
