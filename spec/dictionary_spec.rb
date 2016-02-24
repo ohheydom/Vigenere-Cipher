@@ -8,7 +8,9 @@ describe Dictionary do
   describe '#all_words' do
     subject { @words.all_words }
     it { should be_a Array }
-    its(:count) { should eq(File.read(DICTIONARY_FILE).scan(/^\w{3,}$/).count + Dictionary::EXTRA_WORDS.count) }
+    it 'should have the same count as the dictionary' do
+      expect(@words.all_words.count).to eq(File.read(DICTIONARY_FILE).scan(/^\w{3,}$/).count + Dictionary::EXTRA_WORDS.count)
+    end
 
     it 'does not return any strings less than 3 characters' do
       expect((@words.all_words.grep(/^\w{1,2}$/) - Dictionary::EXTRA_WORDS).count).to eq(0)
@@ -18,7 +20,9 @@ describe Dictionary do
   describe '#words_by_size' do
     subject { @words.words_by_size(3, 25) }
     it { should be_a Array }
-    its(:count) { should eq((File.read(DICTIONARY_FILE).scan(/^\w{3,}$/)) .count) }
+    it 'should have the same count as the dictionary' do
+      expect(@words.words_by_size(3, 25).count).to eq((File.read(DICTIONARY_FILE).scan(/^\w{3,}$/)) .count)
+    end
 
     it 'does not return any strings less than 3 characters' do
       x = 3
